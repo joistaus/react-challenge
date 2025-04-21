@@ -76,9 +76,35 @@ BalanceOutput.propTypes = {
 };
 
 export default connect(state => {
-  let balance = [];
+  let balance = [];  
+  balance = state.journalEntries.filter(_ => true);
 
-  /* YOUR CODE GOES HERE */
+  if (state.userInput.startAccount && !isNaN(state.userInput.startAccount)) {
+    balance = balance.filter(b => b.ACCOUNT >= state.userInput.startAccount)
+  }
+
+  if (state.userInput.endAccount && !isNaN(state.userInput.endAccount)) {
+    balance = balance.filter(b => b.ACCOUNT <= state.userInput.endAccount)
+  }
+
+  if (state.userInput.startPeriod && !isNaN(state.userInput.startPeriod)) {
+    balance = balance.filter(b => b.PERIOD >= state.userInput.startPeriod)
+  }
+
+  if (state.userInput.endPeriod && !isNaN(state.userInput.endPeriod)) {
+    balance = balance.filter(b => b.PERIOD <= state.userInput.endPeriod)
+  }
+
+  balance = balance.sort((a, b) => a.ACCOUNT - b.ACCOUNT);
+
+  balance = balance.map(b => { 
+    const account = state.accounts.find(a => a.ACCOUNT === b.ACCOUNT)
+    return {
+      ...b,
+      BALANCE: b.DEBIT - b.CREDIT,
+      DESCRIPTION: account == null ? 'Unknown' : account.LABEL,
+    }
+  });
 
   const totalCredit = balance.reduce((acc, entry) => acc + entry.CREDIT, 0);
   const totalDebit = balance.reduce((acc, entry) => acc + entry.DEBIT, 0);
